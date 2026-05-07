@@ -414,6 +414,15 @@ function renderStave(note1, note2, clef, container) {
     new VF.Formatter().joinVoices([voice]).format([voice], W - 80);
     voice.draw(ctx, stave);
 
+    // Make the SVG scale down on narrow screens while capping at its natural width
+    const svg = container.querySelector('svg');
+    if (svg) {
+      svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+      svg.setAttribute('width', '100%');
+      svg.style.maxWidth  = `${W}px`;
+      svg.style.height    = 'auto';
+    }
+
   } catch (err) {
     container.innerHTML = `<p style="color:#c00;font-size:0.82rem;text-align:center">Notation error: ${err.message}</p>`;
     console.error('VexFlow:', err);
@@ -518,17 +527,24 @@ function newQuestion() {
 // ── Grade change: enforce syllabus constraints on other controls ──
 
 function applyGradeConstraints() {
-  const grade  = Number($('sel-grade').value);
-  const clefEl = $('sel-clef');
-  const dirEl  = $('sel-direction');
+  const grade   = Number($('sel-grade').value);
+  const clefEl  = $('sel-clef');
+  const dirEl   = $('sel-direction');
+  const qualEl  = $('sel-quality');
 
+  // Alto clef: Grade 5+
   clefEl.querySelector('option[value="alto"]').disabled = grade < 5;
   if (grade < 5 && clefEl.value === 'alto') clefEl.value = 'treble';
 
+  // Direction: only "above" for Grades 1–4
   dirEl.querySelectorAll('option').forEach(o => {
     o.disabled = grade < 5 && o.value !== 'above';
   });
   if (grade < 5) dirEl.value = 'above';
+
+  // Quality filter: not meaningful until Grade 5 (intervals unnamed by quality)
+  qualEl.disabled = grade < 5;
+  if (grade < 5) qualEl.value = 'all';
 }
 
 // ── Boot ──────────────────────────────────────────────────────

@@ -103,6 +103,11 @@ body {
   box-shadow: 0 0 0 2px rgba(43,75,130,0.15);
 }
 
+.filter-group select:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
 /* ── Question card ───────────────────────────────────────────── */
 
 .question-card {
@@ -134,13 +139,8 @@ body {
   align-items: center;
   min-height: 185px;
   margin-bottom: 1.25rem;
-  overflow: hidden;
-}
-
-.stave-container svg {
-  display: block;
-  max-width: 100%;
-  height: auto;
+  /* overflow visible so ledger lines above/below the stave are never clipped */
+  overflow: visible;
 }
 
 /* ── Answer buttons ──────────────────────────────────────────── */
