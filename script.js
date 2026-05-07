@@ -376,13 +376,14 @@ function generateQuestion({ grade, clef, direction, mode, qualityFilter }) {
 function renderStave(note1, note2, clef, container) {
   container.innerHTML = '';
 
-  if (typeof Vex === 'undefined') {
+  if (typeof VexFlow === 'undefined') {
     container.innerHTML = '<p style="color:#c00;font-size:0.82rem;text-align:center">VexFlow failed to load.</p>';
     return;
   }
 
   try {
-    const VF = Vex.Flow;
+    // VexFlow 5: global is VexFlow, classes are directly on it (no .Flow namespace)
+    const VF = VexFlow;
     const W  = 300, H = 185;
 
     const renderer = new VF.Renderer(container, VF.Renderer.Backends.SVG);
@@ -401,15 +402,12 @@ function renderStave(note1, note2, clef, container) {
 
     [note1, note2].forEach((n, i) => {
       if (!n || !n.accidental) return;
-      const acc = new VF.Accidental(n.accidental);
-      // VexFlow 4.x uses addModifier(modifier, index); 3.x uses addAccidental(index, modifier)
-      typeof sn.addModifier === 'function'
-        ? sn.addModifier(acc, i)
-        : sn.addAccidental(i, acc);
+      sn.addModifier(new VF.Accidental(n.accidental), i);
     });
 
     // A single whole note fills exactly one 4/4 bar — no strict-mode issue.
-    const voice = new VF.Voice({ num_beats: 4, beat_value: 4 });
+    // VexFlow 5 uses camelCase: numBeats / beatValue (not num_beats / beat_value)
+    const voice = new VF.Voice({ numBeats: 4, beatValue: 4 });
     voice.addTickables([sn]);
     new VF.Formatter().joinVoices([voice]).format([voice], W - 80);
     voice.draw(ctx, stave);
