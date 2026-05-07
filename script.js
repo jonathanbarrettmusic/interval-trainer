@@ -366,15 +366,58 @@ function generateQuestion({ grade, clef, direction, mode, qualityFilter }) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  RENDERER  (VexFlow implementation added in step 3)
+//  RENDERER  — VexFlow stave rendering
+//
+//  note1 : always shown (lower note in identify, root in build)
+//  note2 : second note shown as a chord; null = single notehead
+//           (build mode withholds it until the student answers)
 // ═══════════════════════════════════════════════════════════════
 
-function renderStave(lower, upper, clef, container) {
-  container.innerHTML =
-    `<p style="font-size:0.82rem;color:#bbb;text-align:center;padding:1.2rem 0">
-       Notation rendering — step 3<br>
-       <em style="color:#aaa">${noteLabel(lower)} &nbsp;↔&nbsp; ${noteLabel(upper)}</em>
-     </p>`;
+function renderStave(note1, note2, clef, container) {
+  container.innerHTML = '';
+
+  if (typeof Vex === 'undefined') {
+    container.innerHTML = '<p style="color:#c00;font-size:0.82rem;text-align:center">VexFlow failed to load.</p>';
+    return;
+  }
+
+  try {
+    const VF = Vex.Flow;
+    const W  = 300, H = 185;
+
+    const renderer = new VF.Renderer(container, VF.Renderer.Backends.SVG);
+    renderer.resize(W, H);
+    const ctx = renderer.getContext();
+
+    // staveY = 68 leaves ~68 px above for ledger lines on high notes
+    const stave = new VF.Stave(10, 68, W - 20);
+    stave.addClef(clef);
+    stave.setContext(ctx).draw();
+
+    // Build a StaveNote. When note2 is given, display as a chord (both
+    // noteheads at the same rhythmic position — standard for interval notation).
+    const keys = note2 ? [vexKey(note1), vexKey(note2)] : [vexKey(note1)];
+    const sn   = new VF.StaveNote({ clef, keys, duration: 'w' });
+
+    [note1, note2].forEach((n, i) => {
+      if (!n || !n.accidental) return;
+      const acc = new VF.Accidental(n.accidental);
+      // VexFlow 4.x uses addModifier(modifier, index); 3.x uses addAccidental(index, modifier)
+      typeof sn.addModifier === 'function'
+        ? sn.addModifier(acc, i)
+        : sn.addAccidental(i, acc);
+    });
+
+    // A single whole note fills exactly one 4/4 bar — no strict-mode issue.
+    const voice = new VF.Voice({ num_beats: 4, beat_value: 4 });
+    voice.addTickables([sn]);
+    new VF.Formatter().joinVoices([voice]).format([voice], W - 80);
+    voice.draw(ctx, stave);
+
+  } catch (err) {
+    container.innerHTML = `<p style="color:#c00;font-size:0.82rem;text-align:center">Notation error: ${err.message}</p>`;
+    console.error('VexFlow:', err);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -415,7 +458,11 @@ function renderQuestion(q) {
   $('feedback').className        = 'feedback';
   $('btn-next').hidden           = true;
 
-  renderStave(q.lower, q.upper, q.clef, $('stave-container'));
+  // Identify: show both notes as a chord. Build: show only the root — the
+  // student selects the second note; it is revealed after they answer.
+  const sn1 = q.mode === 'identify' ? q.lower : q.root;
+  const sn2 = q.mode === 'identify' ? q.upper : null;
+  renderStave(sn1, sn2, q.clef, $('stave-container'));
 
   const answersEl = $('answers');
   answersEl.innerHTML = '';
@@ -439,6 +486,9 @@ function handleAnswer(chosen) {
 
   if (correct) { state.score++; state.streak++; }
   else         { state.streak = 0; }
+
+  // Reveal the complete interval on the stave (matters for build mode)
+  renderStave(q.lower, q.upper, q.clef, $('stave-container'));
 
   fbEl.className   = `feedback ${correct ? 'correct' : 'incorrect'}`;
   fbEl.textContent = `${correct ? '✓ Correct.' : '✗ Incorrect.'} ${q.explanation}`;

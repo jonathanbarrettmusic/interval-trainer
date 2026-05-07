@@ -132,7 +132,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 120px;
+  min-height: 185px;
   margin-bottom: 1.25rem;
   overflow: hidden;
 }
