@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interval Trainer</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://unpkg.com/vexflow/releases/vexflow-min.js"></script>
+</head>
+<body>
+
+  <header class="site-header">
+    <h1>Interval Trainer</h1>
+    <p class="subtitle">ABRSM &amp; Trinity Guildhall — Grades 1–8</p>
+  </header>
+
+  <main class="main">
+
+    <!-- ── Filters ───────────────────────────────────────────────── -->
+    <section class="filters" aria-label="Settings">
+
+      <div class="filter-group">
+        <label for="sel-mode">Mode</label>
+        <select id="sel-mode">
+          <option value="identify">Identify</option>
+          <option value="build">Build</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="sel-grade">Grade</label>
+        <select id="sel-grade">
+          <option value="1">Grade 1</option>
+          <option value="2">Grade 2</option>
+          <option value="3">Grade 3</option>
+          <option value="4">Grade 4</option>
+          <option value="5">Grade 5</option>
+          <option value="6">Grade 6</option>
+          <option value="7">Grade 7</option>
+          <option value="8" selected>Grade 8</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="sel-clef">Clef</label>
+        <select id="sel-clef">
+          <option value="treble">Treble</option>
+          <option value="bass">Bass</option>
+          <option value="alto">Alto</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="sel-direction">Direction</label>
+        <select id="sel-direction">
+          <option value="above">Above</option>
+          <option value="below">Below</option>
+          <option value="both" selected>Both</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="sel-quality">Quality</label>
+        <select id="sel-quality">
+          <option value="all" selected>All intervals</option>
+          <option value="perfect">Perfect only</option>
+          <option value="major-minor">Major &amp; minor only</option>
+          <option value="aug-dim">Augmented &amp; diminished</option>
+          <option value="diatonic">Diatonic only</option>
+        </select>
+      </div>
+
+    </section>
+
+    <!-- ── Question card ─────────────────────────────────────────── -->
+    <section class="question-card" aria-live="polite">
+
+      <p id="question-prompt" class="question-prompt">Press <strong>New Question</strong> to begin.</p>
+
+      <div id="stave-container" class="stave-container" aria-label="Musical notation"></div>
+
+      <div id="answers" class="answers" role="group" aria-label="Answer choices"></div>
+
+      <div id="feedback" class="feedback" aria-live="assertive"></div>
+
+    </section>
+
+    <!-- ── Controls ──────────────────────────────────────────────── -->
+    <div class="controls">
+      <button id="btn-new" class="btn-primary">New Question</button>
+      <button id="btn-next" class="btn-secondary" hidden>Next →</button>
+    </div>
+
+    <!-- ── Score panel ───────────────────────────────────────────── -->
+    <section class="score-panel" aria-label="Session score">
+      <div class="score-item">
+        <span class="score-label">Score</span>
+        <span id="score-display" class="score-value">0 / 0</span>
+      </div>
+      <div class="score-item">
+        <span class="score-label">Streak</span>
+        <span id="streak-display" class="score-value">0</span>
+      </div>
+      <button id="btn-reset" class="btn-ghost">Reset session</button>
+    </section>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
